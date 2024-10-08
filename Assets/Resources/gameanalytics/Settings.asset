@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1960576706, guid: 0d48c0d1dce38f2448a6f38930ca3d4a, type: 3}
+  m_Name: Settings
+  m_EditorClassIdentifier:
+  TotalMessagesSubmitted: 0
+  TotalMessagesFailed: 0
+  DesignMessagesSubmitted: 0
+  DesignMessagesFailed: 0
+  QualityMessagesSubmitted: 0
+  QualityMessagesFailed: 0
+  ErrorMessagesSubmitted: 0
+  ErrorMessagesFailed: 0
+  BusinessMessagesSubmitted: 0
+  BusinessMessagesFailed: 0
+  UserMessagesSubmitted: 0
+  UserMessagesFailed: 0
+  CustomArea:
+  gameKey:
+  - 59102a7e9f4fc679620dc745d676338a
+  - 2de9d9983678c07cc9435833268203a8
+  secretKey:
+  - a3b519b253b5f6d789ed5cc51383e3d25af7f058
+  - fecb49f0f08b9cf165f6e33fd6c858aecf60202b
+  Build:
+  - 0.1
+  - 0.1
+  SelectedPlatformOrganization:
+  - 
+  - 
+  SelectedPlatformStudio:
+  - 
+  - 
+  SelectedPlatformGame:
+  - 
+  - 
+  SelectedPlatformGameID: ffffffffffffffff
+  SelectedOrganization: 0000000000000000
+  SelectedStudio: 0000000000000000
+  SelectedGame: 0000000000000000
+  NewVersion: 7.3.24
+  Changes: "7.3.24\n- fixed fps script for when pausing game\n\n7.3.23\n- fixed bug with custom fields (locale related bug)\n\n7.3.22\n- added external dependency manager for .unitypackage release as well to solve issues with appset id on android\n\n7.3.21\n- fixed bug in internal error reporting\n\n7.3.20\n- added event uuid to events sent\n\n7.3.19\n- updated dependencies\n\n7.3.18\n- fixed fps event script to still run coroutines when Time.timeScale = 0 by using WaitForSecondsRealtime instead of WaitForSeconds\n\n7.3.17\n- added method manually update gamekey and secretkey\n\n7.3.16\n- fixed uwp build errors\n\n7.3.15\n- changed frequency logic for fps events\n\n7.3.14\n- small fix\n\n7.3.13\n- fixed crash for android builds\n\n7.3.12\n- removed imei identifiers and other alternative identifiers from user identifier logic (android)\n\n7.3.11\n- updated dependency to external dependency resolver\n\n7.3.10\n- adding missing .meta file for upm release\n- switched to using openupm for scoped registry when using upm, please update the upm setup for the unity sdk\n\n7.3.9\n- fixed upm package.json\n\n7.3.8\n- fixed upm dependecy\n\n7.3.7\n- added depedencies.xml for upm release\n\n7.3.6\n- fixed playmaker bugs\n\n7.3.5\n- changed settings to have FPS events turned off by default\n\n7.3.4\n- added error events to be sent for invalid custom event fields used\n- added optional mergeFields argument to event methods to merge with global custom fields instead of overwrite them\n\n7.3.3\n- playmaker fixes\n\n7.3.2\n- fixed missing custom event fields for when trying to fix missing session end events\n\n7.3.1\n- fixed editor ui bug with games with the same name\n\n7.3.0\n- added global custom event fields function to allow to add custom fields to events sent automatically by the SDK\n\n7.2.1\n- added functionality to force a new user in a/b testing without having to uninstall app first, simply use custom user id function to set a new user id which hasn't been used yet\n\n7.2.0\n- added support for admob impression events\n\n7.1.1\n- fixed build errors for desktop platforms\n\n7.1.0\n- added custom event fields feature\n\n7.0.5\n- updated hyperbid ilrd integration\n\n7.0.4\n- added ios part for aequus ilrd integration\n\n7.0.3\n- renamed ATT method name to avoid dupplicate symbols\n\n7.0.2\n- fixes to ILRD integrations\n\n7.0.1\n- updated ILRD integrations\n\n7.0.0\n- Changed user identifier logic in preparation for Google changes to GAID. User id for a new install is now a randomised GUID. Existing installs that update SDK will continue using previous identifier logic. It is recommended to update as soon as possible to reduce impact on calculated metrics.\n\n6.7.1\n- fixes to max irld integration"
+  SignUpOpen: 1
+  StudioName:
+  GameName:
+  OrganizationName:
+  OrganizationIdentifier:
+  EmailGA:
+  IntroScreen: 1
+  InfoLogEditor: 1
+  InfoLogBuild: 1
+  VerboseLogBuild: 0
+  UseManualSessionHandling: 0
+  SendExampleGameDataToMyGame: 0
+  UseIMEI: 0
+  InternetConnectivity: 0
+  CustomDimensions01: []
+  CustomDimensions02: []
+  CustomDimensions03: []
+  ResourceItemTypes: []
+  ResourceCurrencies: []
+  LastCreatedGamePlatform: 0
+  Platforms: 080000000b000000
+  CurrentInspectorState: 0
+  ClosedHints:
+  DisplayHints: 0
+  DisplayHintsScrollState: {x: 0, y: 0}
+  Logo: {fileID: 0}
+  UpdateIcon: {fileID: 0}
+  InfoIcon: {fileID: 0}
+  DeleteIcon: {fileID: 0}
+  GameIcon: {fileID: 0}
+  HomeIcon: {fileID: 0}
+  InstrumentIcon: {fileID: 0}
+  QuestionIcon: {fileID: 0}
+  UserIcon: {fileID: 0}
+  AmazonIcon: {fileID: 0}
+  GooglePlayIcon: {fileID: 0}
+  iosIcon: {fileID: 0}
+  macIcon: {fileID: 0}
+  windowsPhoneIcon: {fileID: 0}
+  UsePlayerSettingsBuildNumber: 1
+  SubmitErrors: 1
+  NativeErrorReporting: 0
+  MaxErrorCount: 10
+  SubmitFpsAverage: 1
+  SubmitFpsCritical: 1
+  IncludeGooglePlay: 1
+  FpsCriticalThreshold: 20
+  FpsCirticalSubmitInterval: 1
+  PlatformFoldOut: 0101
+  CustomDimensions01FoldOut: 0
+  CustomDimensions02FoldOut: 0
+  CustomDimensions03FoldOut: 0
+  ResourceItemTypesFoldOut: 0
+  ResourceCurrenciesFoldOut: 0

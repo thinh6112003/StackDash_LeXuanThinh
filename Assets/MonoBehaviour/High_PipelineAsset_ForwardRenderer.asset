@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1575395517, guid: c88ab7b37c4f350242674d2efd621c19, type: 3}
+  m_Name: High_PipelineAsset_ForwardRenderer
+  m_EditorClassIdentifier:
+  debugShaders:
+    debugReplacementPS: {fileID: 4800000, guid: 5f4d853d8926147489a9a5e90580b8fc, type: 3}
+  m_RendererFeatures: []
+  m_RendererFeatureMap:
+  m_UseNativeRenderPass: 0
+  postProcessData: {fileID: 11400000, guid: e6203c0da3434fc4d865974c32325a1b, type: 2}
+  xrSystemData: {fileID: 11400000, guid: e89d490fbbca3f64d9d70adc9ba251d7, type: 2}
+  shaders:
+    blitPS: {fileID: 4800000, guid: 8b81da67447a55544be9ac7585656bd2, type: 3}
+    copyDepthPS: {fileID: 4800000, guid: 5277970d8335c6048a3669d5238e43ec, type: 3}
+    screenSpaceShadowPS: {fileID: 0}
+    samplingPS: {fileID: 4800000, guid: 3a854634fe7ef58409a8c4f5288703a7, type: 3}
+    stencilDeferredPS: {fileID: 4800000, guid: 7e9438e462cd35942833e80935bc0620, type: 3}
+    fallbackErrorPS: {fileID: 4800000, guid: 3c2a3eaa084b74c41b7845b12c7ca54d, type: 3}
+    materialErrorPS: {fileID: 4800000, guid: 776786f0ef91dff4695a31168abb0654, type: 3}
+    coreBlitPS: {fileID: 4800000, guid: 7b644a81e8c2b94449ac4ac7d71506f6, type: 3}
+    coreBlitColorAndDepthPS: {fileID: 4800000, guid: 26f678e74aa43ee47b1ade873cb36c0f, type: 3}
+    cameraMotionVector: {fileID: 4800000, guid: cb2fb34379f4b464c8792547530aad97, type: 3}
+    objectMotionVector: {fileID: 4800000, guid: 468b6be18b3de424bbed5b30de676666, type: 3}
+  m_AssetVersion: 2
+  m_OpaqueLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_TransparentLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_DefaultStencilState:
+    overrideStencilState: 0
+    stencilReference: 0
+    stencilCompareFunction: 8
+    passOperation: 2
+    failOperation: 0
+    zFailOperation: 0
+  m_ShadowTransparentReceive: 1
+  m_RenderingMode: 0
+  m_DepthPrimingMode: 0
+  m_CopyDepthMode: 0
+  m_AccurateGbufferNormals: 0
+  m_ClusteredRendering: 0
+  m_TileSize: 32
+  m_IntermediateTextureMode: 1
