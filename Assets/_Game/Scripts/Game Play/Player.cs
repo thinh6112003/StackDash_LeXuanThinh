@@ -28,6 +28,7 @@ public class Player : MonoBehaviour
     private int moveNext = 1 << 6;
     private int toSlope = 1 << 7;
     private int slope = 1 << 8;
+    private int bridgeBridge = 1 << 10;
     private int indexInBridge;
     private bool isMove = false;
     private bool directOnBridge = false;// false: negative, True: positive 
@@ -129,28 +130,35 @@ public class Player : MonoBehaviour
     }
     private void PickBrick(GameObject brick)
     {
+        brick.tag = conststring.UNTAGGED;
         brick.transform.parent = brickContainerTf;
         brickContainer.Push(brick.transform);
         countBridgeInBody++;
         brick.transform.localPosition = -countBridgeInBody*brickHeight+ brickHeight * 2;
 
-        playerModel.DOMove(playerModel.position + brickHeight, oneBrick / speed).OnUpdate(() => {
-            Vector3 pos = playerModel.localPosition;
-            playerModel.localPosition = new Vector3(0, pos.y, 0);
-        });
+        playerModel.DOLocalMoveY(playerModel.localPosition.y + brickHeight.y, oneBrick / speed).SetEase(Ease.Linear);
 
-        brickContainerTf.DOMove(brickContainerTf.position + brickHeight, oneBrick / speed).OnUpdate(()=> {
-            Vector3 pos = brickContainerTf.localPosition;
-            brickContainerTf.localPosition= new Vector3(0,pos.y, 0);
-        });
+        brickContainerTf.DOLocalMoveY(brickContainerTf.localPosition.y + brickHeight.y, oneBrick / speed).SetEase(Ease.Linear);
     }
-    private void LayBrick()
+    private bool LayBrick()
     {
+        Debug.Log("Lay");
+        if (brickContainer.Count == 0) return false;
+        int indexBrick = brickContainer.Count - 1;
         Transform brickTransform = brickContainer.Pop();
-        Debug.Log(brickTransform.gameObject);
-        brickTransform.parent =  listBridgePointCurrent[indexInBridge-1];
-        brickTransform.position = listBridgePointCurrent[indexInBridge-1].position;
+        brickTransform.gameObject.GetComponent<Collider>().enabled = false;
+        brickTransform.parent = listBridgePointCurrent[indexInBridge - 1];
+        //Destroy(brickTransform.gameObject);
+        brickTransform.position = listBridgePointCurrent[indexInBridge - 1].position;
 
+        //playerModel.DOLocalMoveY(playerModel.localPosition.y - brickHeight.y, 0).SetEase(Ease.Linear);
+
+        Vector3 brickContainerLcPos = brickContainerTf.position;
+        Vector3 playerModelLcPos = playerModel.position;
+        brickContainerTf.position=  new Vector3(brickContainerLcPos.x, brickContainerLcPos.y- brickHeight.y, brickContainerLcPos.z);
+        playerModel.position=  new Vector3(playerModelLcPos.x, playerModelLcPos.y- brickHeight.y, playerModelLcPos.z);
+        countBridgeInBody--;
+        return true;
     }
     private void MoveBridge(bool direct)
     {
@@ -163,8 +171,13 @@ public class Player : MonoBehaviour
     }
     public void MoveNextBridgePoint()
     {
-        LayBrick();
-        if(indexInBridge == listBridgePointCurrent.Count || indexInBridge < 0)
+        if (!LayBrick())
+        {
+            DOTween.KillAll();
+
+            return;  
+        }
+        if (indexInBridge == listBridgePointCurrent.Count || indexInBridge < 0)
         {
             isMove = true;
             Vector3 directToPlane ;
@@ -176,11 +189,11 @@ public class Player : MonoBehaviour
             return;
         }
         Vector3 posPoint = listBridgePointCurrent[indexInBridge].position;
-        if (directOnBridge) indexInBridge++;
-        else indexInBridge--;
         player.transform.DOMove( new Vector3(posPoint.x,player.transform.position.y,posPoint.z),oneBridge/speed).SetEase(Ease.Linear)
             .SetEase(Ease.Linear);
         Invoke(nameof(MoveNextBridgePoint), oneBridge/speed);
+        if (directOnBridge) indexInBridge++;
+        else indexInBridge--;
     }
 }
 public static class conststring
@@ -189,4 +202,6 @@ public static class conststring
     public static string LOPEUP = "LopeUP";
     public static string ENDBRIDGE = "EndBridge";
     public static string ENTRANCEBRIDGE = "EntranceBridge";
+    public static string BRIDGEBRICK = "BridgeBrick";
+    public static string UNTAGGED = "Untagged";
 }
