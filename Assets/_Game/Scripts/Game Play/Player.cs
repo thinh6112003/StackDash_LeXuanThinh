@@ -12,7 +12,7 @@ public class Player : MonoBehaviour
     [SerializeField] private float speed= 10;
     //private tran
     private List<Transform> listBridgePointCurrent = new List<Transform>();
-    private Stack<Transform> brickContainer= new Stack<Transform>();
+    [SerializeField] private List<Transform> brickContainer= new List<Transform>();
     private Bridge bridgeCurrent;
     private Vector3 pointCheckOffset = new Vector3(0f, 0.25f, 0f);
     private Vector3 brickOnBridgeOffset = new Vector3(0f, 0.28f, 0f);
@@ -29,8 +29,10 @@ public class Player : MonoBehaviour
     private int toSlope = 1 << 7;
     private int slope = 1 << 8;
     private int bridgeBridge = 1 << 10;
+    private int ground = 1 << 11;
     private int indexInBridge;
     private bool isMove = false;
+    private bool isOutBeginBridge = false;
     private bool directOnBridge = false;// false: negative, True: positive 
     private bool isOnBridge = false;
     private bool isMouseDown = false;
@@ -42,8 +44,8 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        //Debug.Log("IS MOVE    :" + isMove);
-        //Debug.Log("IS onbridge:" + isOnBridge);
+        //Debug.Log("IS  ismove:" + isMove);
+        //Debug.Log("IS  isonbridge:" + isOutBeginBridge);
         OnMove();
     }
 
@@ -75,6 +77,11 @@ public class Player : MonoBehaviour
     {
         Vector3 playerPos = player.transform.position;
         RaycastHit hit;
+        if (isOutBeginBridge)
+        {
+            Debug.Log("is into check");
+            if (!Physics.Raycast(playerPos + pointCheckOffset + direc * 3f, Vector3.down, out hit, 5,ground)) return;
+        }
         if (Physics.Raycast(playerPos + pointCheckOffset + direc*0.8f, direc, out hit, 50f))
         {
             int layer = 1<< (hit.transform.gameObject.layer);
@@ -91,6 +98,10 @@ public class Player : MonoBehaviour
                     .OnComplete(() => {
                         if (isEndBridge) isOnBridge = false;
                         if (!isOnBridge) isMove = false;
+                        if (layer == moveNext)
+                        {
+                            DetermineTarget(direc, isEndBridge);
+                        }
                     });
             }
             else if(layer == toSlope)
@@ -128,11 +139,18 @@ public class Player : MonoBehaviour
         }
         if (other.gameObject.tag == conststring.BRICK) PickBrick(other.gameObject);
     }
+    private void OnTriggerExit(Collider other)
+    {
+        if(other.gameObject.tag == conststring.ENTRANCEBRIDGE|| other.gameObject.tag== conststring.ENDBRIDGE)
+        {
+            if (isOutBeginBridge) isOutBeginBridge = false;
+        }
+    }
     private void PickBrick(GameObject brick)
     {
         brick.tag = conststring.UNTAGGED;
         brick.transform.parent = brickContainerTf;
-        brickContainer.Push(brick.transform);
+        brickContainer.Add(brick.transform);
         countBridgeInBody++;
         brick.transform.localPosition = -countBridgeInBody*brickHeight+ brickHeight * 2;
 
@@ -140,60 +158,98 @@ public class Player : MonoBehaviour
 
         brickContainerTf.DOLocalMoveY(brickContainerTf.localPosition.y + brickHeight.y, oneBrick / speed).SetEase(Ease.Linear);
     }
-    private bool LayBrick()
-    {
-        Debug.Log("Lay");
-        if (brickContainer.Count == 0) return false;
-        int indexBrick = brickContainer.Count - 1;
-        Transform brickTransform = brickContainer.Pop();
-        brickTransform.gameObject.GetComponent<Collider>().enabled = false;
-        brickTransform.parent = listBridgePointCurrent[indexInBridge - 1];
-        //Destroy(brickTransform.gameObject);
-        brickTransform.position = listBridgePointCurrent[indexInBridge - 1].position;
-
-        //playerModel.DOLocalMoveY(playerModel.localPosition.y - brickHeight.y, 0).SetEase(Ease.Linear);
-
-        Vector3 brickContainerLcPos = brickContainerTf.position;
-        Vector3 playerModelLcPos = playerModel.position;
-        brickContainerTf.position=  new Vector3(brickContainerLcPos.x, brickContainerLcPos.y- brickHeight.y, brickContainerLcPos.z);
-        playerModel.position=  new Vector3(playerModelLcPos.x, playerModelLcPos.y- brickHeight.y, playerModelLcPos.z);
-        countBridgeInBody--;
-        return true;
-    }
     private void MoveBridge(bool direct)
     {
+        //  Time.timeScale = 0.1f;
+        if(brickContainer.Count==0 && !bridgeCurrent.checkBrick(indexInBridge))
+        {
+            isOutBeginBridge = true;
+        }
         directOnBridge = direct;
         isMove = true;
         listBridgePointCurrent = bridgeCurrent.MyBridgePath().ListBridgePoints();
-        indexInBridge = directOnBridge ? 1: listBridgePointCurrent.Count-2 ;
+        indexInBridge = directOnBridge ? 0: listBridgePointCurrent.Count-1 ;
         DOTween.KillAll();
         MoveNextBridgePoint();
     }
     public void MoveNextBridgePoint()
     {
-        if (!LayBrick())
-        {
-            DOTween.KillAll();
-
-            return;  
-        }
         if (indexInBridge == listBridgePointCurrent.Count || indexInBridge < 0)
         {
-            isMove = true;
-            Vector3 directToPlane ;
-            if (directOnBridge)
-                directToPlane = bridgeCurrent.MyEndBridge().transform.forward;
-            else
-                directToPlane = -bridgeCurrent.MyEntranceBridge().transform.forward;
-            DetermineTarget(directToPlane * half, true);
+            HandleEndBridge();
             return;
         }
         Vector3 posPoint = listBridgePointCurrent[indexInBridge].position;
-        player.transform.DOMove( new Vector3(posPoint.x,player.transform.position.y,posPoint.z),oneBridge/speed).SetEase(Ease.Linear)
-            .SetEase(Ease.Linear);
-        Invoke(nameof(MoveNextBridgePoint), oneBridge/speed);
-        if (directOnBridge) indexInBridge++;
-        else indexInBridge--;
+        int index = indexInBridge;
+        if (!bridgeCurrent.checkBrick(indexInBridge + 1))
+        {
+            HandleNextPointNotBrick(index, posPoint);
+        }
+        else
+        {
+            HandleNextPointIsBrick(index, posPoint);
+        }
+    }
+
+    private void HandleNextPointNotBrick(int index, Vector3 posPoint)
+    {
+        if (brickContainer.Count == 0) 
+        {
+            HandleIsOutBrickInBody();
+            return;
+        }
+        bridgeCurrent.setBrickStatus(index, true);
+        Transform brickTransformOut = LayBrickModel(index);
+        indexInBridge += directOnBridge ? 1 : -1;
+        player.transform.DOMove(new Vector3(posPoint.x, player.transform.position.y, posPoint.z), oneBridge / speed).SetEase(Ease.Linear)
+            .SetEase(Ease.Linear)
+            .OnComplete(() => {
+                LayBrickView(brickTransformOut, index);
+                MoveNextBridgePoint();
+            });
+    }
+    private void HandleNextPointIsBrick(int index, Vector3 posPoint)
+    {
+        Transform brickTransformOut = LayBrickModel(index);
+        indexInBridge += directOnBridge ? 1 : -1;
+        player.transform.DOMove(new Vector3(posPoint.x, player.transform.position.y, posPoint.z), oneBridge / speed).SetEase(Ease.Linear)
+            .SetEase(Ease.Linear)
+            .OnComplete(() => {
+                MoveNextBridgePoint();
+            });
+    }
+    private void HandleIsOutBrickInBody()
+    {
+        DOTween.KillAll();
+        isOnBridge = false;
+        isMove = false;
+    }
+    private void HandleEndBridge()
+    {
+        isMove = true;
+        Vector3 directToPlane;
+        if (directOnBridge)
+            directToPlane = bridgeCurrent.MyEndBridge().transform.forward;
+        else
+            directToPlane = -bridgeCurrent.MyEntranceBridge().transform.forward;
+        DetermineTarget(directToPlane * half, true);
+    }
+    private Transform LayBrickModel(int index)
+    {
+        int indexBrick = brickContainer.Count - 1;
+        Transform brickTransform = brickContainer[indexBrick];
+        brickContainer.RemoveAt(indexBrick);
+        return brickTransform;
+    }
+    private void LayBrickView(Transform brickTransform, int index)
+    {
+        brickTransform.parent = listBridgePointCurrent[index];
+        brickTransform.position = listBridgePointCurrent[index].position;
+        countBridgeInBody--;
+        Vector3 brickContainerLcPos = brickContainerTf.position;
+        Vector3 playerModelLcPos = playerModel.position;
+        brickContainerTf.position = new Vector3(brickContainerLcPos.x, brickContainerLcPos.y - brickHeight.y, brickContainerLcPos.z);
+        playerModel.position = new Vector3(playerModelLcPos.x, playerModelLcPos.y - brickHeight.y, playerModelLcPos.z);
     }
 }
 public static class conststring
@@ -204,4 +260,5 @@ public static class conststring
     public static string ENTRANCEBRIDGE = "EntranceBridge";
     public static string BRIDGEBRICK = "BridgeBrick";
     public static string UNTAGGED = "Untagged";
+    public static string GROUND = "Ground";
 }

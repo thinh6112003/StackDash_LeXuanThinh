@@ -11,6 +11,7 @@ public class Bridge : MonoBehaviour
     public BridgePath MyBridgePath()
     {
         return myBridgePath;
+        
     }
     public EndBridge MyEndBridge()
     {
@@ -19,5 +20,14 @@ public class Bridge : MonoBehaviour
     public EntranceBridge MyEntranceBridge()
     {
         return myEntranceBridge;
+    }
+
+    public bool checkBrick(int index)
+    {
+        return myBridgePath.checkBrick(index);
+    }
+    public void setBrickStatus(int index, bool status)
+    {
+        myBridgePath.setBrickStatus(index, status);
     }
 }
