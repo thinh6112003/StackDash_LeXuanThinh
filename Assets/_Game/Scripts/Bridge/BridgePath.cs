@@ -13,7 +13,7 @@ public class BridgePath : MonoBehaviour
             listBrickPointsCheck.Add(false);
         }
     }
-    public bool checkBrick(int index)
+    public bool checkBrickStatus(int index)
     {
         if (index == listBrickPointsCheck.Count) return true;
         if (listBrickPointsCheck[index] == true) return true;

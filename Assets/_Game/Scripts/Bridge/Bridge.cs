@@ -17,14 +17,24 @@ public class Bridge : MonoBehaviour
     {
         return myEndBridge;
     }
+    public void TurnOnCheckInOut()
+    {
+        myEndBridge.gameObject.GetComponent<Collider>().enabled = (true);
+        myEntranceBridge.gameObject.GetComponent<Collider>().enabled = (true);
+    }
+    public void TurnOffCheckInOut()
+    {
+        myEndBridge.gameObject.GetComponent<Collider>().enabled=(false);
+        myEntranceBridge.gameObject.GetComponent<Collider>().enabled = (false);
+    }
     public EntranceBridge MyEntranceBridge()
     {
         return myEntranceBridge;
     }
 
-    public bool checkBrick(int index)
+    public bool checkBrickStatus(int index)
     {
-        return myBridgePath.checkBrick(index);
+        return myBridgePath.checkBrickStatus(index);
     }
     public void setBrickStatus(int index, bool status)
     {
