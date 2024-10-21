@@ -6,15 +6,17 @@ using DG.Tweening;
 
 public class Player : MonoBehaviour
 {
+    public LastPiece planeEndGame;
     [SerializeField] private List<Transform> brickContainer= new List<Transform>();
     [SerializeField] private GameObject player;
     [SerializeField] private Animator anim;
     [SerializeField] private Transform playerModel;
     [SerializeField] private Transform brickContainerTf;
-    [SerializeField] private LastPiece planeEndGame;
     [SerializeField] private Transform stairsTf;
     [SerializeField] private float speed= 10;
+    [SerializeField] private bool isPlay = true;
     private List<Transform> listBridgePointCurrent = new List<Transform>();
+    private DynamicData dynamicData;
     private Bridge bridgeCurrent;
     private Transform playerTf;
     private Vector3 target;
@@ -27,7 +29,13 @@ public class Player : MonoBehaviour
     private float half = 0.5f;
     private float oneBrick = 1f;
     private float oneBridge = 1.41f;
+    private int indexInBridge;
     private int countBridgeInBody = 0;
+    private bool isMove = false;
+    private bool isOnBridge = false;
+    private bool isMouseDown = false;
+    private bool directOnBridge = false;// false: negative, True: positive 
+    private bool isOutBeginBridge = false;
     private const int wall = 1 << 3;
     private const int moveNext = 1 << 6;
     private const int toSlope = 1 << 7;
@@ -37,23 +45,33 @@ public class Player : MonoBehaviour
     private const int stair = 1 << 12;
     private const int lastPiece = 1 << 13;
     private const int endGame = 1 << 14;
-    private int indexInBridge;
-    private bool isMove = false;
-    private bool isOnBridge = false;
-    private bool isMouseDown = false;
-    private bool directOnBridge = false;// false: negative, True: positive 
-    private bool isOutBeginBridge = false;
     private void Start()
     {
         //Time.timeScale = 0.1f;
         playerTf = player.transform;
+        dynamicData = DataManager.Instance.dynamicData;
     }
     void Update()
     {
         //Debug.Log("is on bridge: " + isOnBridge);
         //Debug.Log("IS  ismove:" + isMove);
         //Debug.Log("IS  isonbridge:" + isOutBeginBridge);
-        OnMove();
+        if(isPlay)OnMove();
+        Observer.AddListener(conststring.DONECHANGECAM, setPlay);
+        Observer.AddListener(conststring.DONELOADSCENEASYNC, setRefOfGameManager);
+    }
+    protected void setPlay()
+    {
+        isPlay= true;
+    }
+    protected void setRefOfGameManager()
+    {
+        //Observer.RemoveListener(conststring.DONELOADSCENEASYNC, setRefOfGameManager);
+        GameManager.Instance.setPlayer(this);
+    }
+    public void SetPos(Vector3 pos)
+    {
+        playerTf.position = pos;
     }
     private void OnTriggerEnter(Collider other)
     {
@@ -114,6 +132,13 @@ public class Player : MonoBehaviour
                 ChangeAnim(conststring.STACKREACTION);
                 currentAnimName = conststring.IDLE;
                 break;
+            case AnimationType.DANCING:
+                ChangeAnim(conststring.DANCING);
+                break;
+            case AnimationType.SANTO:
+                ChangeAnim(conststring.SANTO);
+                break;
+
         }
     }
     private void OnMove()
@@ -155,10 +180,12 @@ public class Player : MonoBehaviour
         if (isOutBeginBridge && !Physics.Raycast(playerPos + pointCheckOffset*4f + direc * 3f, Vector3.down, out hit, 5, ground)) return;
         if (Physics.Raycast(playerPos + pointCheckOffset * 10f + direc * 2f, Vector3.down, out hit, 5, wall)) return;
         // vi tri ban raycast khi len cau thang dang loi
-        if (Physics.Raycast(playerPos + pointCheckOffset + 0.8f* direc, direc, out hit, 50f))
+        if (Physics.Raycast(playerPos + pointCheckOffset , direc, out hit, 50f))
         {
             int layer = 1<< (hit.transform.gameObject.layer);
-            if (!(layer == toSlope || layer == moveNext || layer == wall|| layer == stair|| layer== lastPiece)) return;
+            if(layer == 1<<10)
+                Debug.DrawLine(direc + pointCheckOffset, direc + pointCheckOffset + direc * 2);
+            if (!(layer == toSlope || layer == moveNext || layer == wall|| layer == stair|| layer== lastPiece|| layer == endGame)) return;
             Quaternion targetRotation = Quaternion.LookRotation(direc);
             playerModel.DORotateQuaternion(targetRotation, 0.15f);
             SetAnimation(AnimationType.MOVE);
@@ -179,7 +206,7 @@ public class Player : MonoBehaviour
                     HandeMoveToStair(hit, playerPos, direc, isEndBridge, time);
                     break;
                 case lastPiece:
-                    MoveLastPiece();
+                    HandeMoveInLastPiece(hit, playerPos, direc, isEndBridge, time);
                     break;
                 case endGame:
                     HandeMoveToEndGame(hit, playerPos, direc, isEndBridge, time);
@@ -187,27 +214,42 @@ public class Player : MonoBehaviour
             }
         }
     }
-
         private void HandeMoveToEndGame(RaycastHit hit, Vector3 playerPos, Vector3 direc, bool isEndBridge, float time)
-    {
-        throw new NotImplementedException();
-    }
+        {
+            Debug.Log("begin move to end game");
+            playerTf.DOMove(new Vector3(hit.point.x, playerTf.position.y, hit.point.z), time)
+                    .SetEase(Ease.Linear)
+                    .OnComplete(() => {
+                        Debug.Log("end game real");
+                        Invoke(nameof(NotiEndgame), 3f);
+                        SetAnimation(AnimationType.SANTO);
+                        isEndBridge = false;
+                        isMove = false;
+                    });
+            //Invoke(nameof(DestroyBrick),0.25f)
+        }
         private void HandeMoveInLastPiece(RaycastHit hit, Vector3 playerPos, Vector3 direc, bool isEndBridge, float time)
         {
-
+            playerTf.DOMove(new Vector3(hit.point.x, playerTf.position.y, hit.point.z), time)
+                .SetEase(Ease.Linear)
+                .OnComplete(() => {
+                    MoveLastPiece();
+                });
         }
         private void HandeMoveToStair(RaycastHit hit, Vector3 playerPos, Vector3 direc, bool isEndBridge, float time)
         {
-            Debug.Log("to stair");
+            pointCheckOffset = new Vector3(0f, 0.25f,1.25f);
+            SetAnimation(AnimationType.SURFING);
             int beginNumberBrick = brickContainer.Count;
-            playerTf.DOMove(new Vector3(hit.point.x, playerTf.position.y, hit.point.z)- direc , time)
+            playerTf.DOMove(new Vector3(hit.point.x, playerTf.position.y, hit.point.z)- direc, time)
                 .SetEase(Ease.Linear)
                 .OnComplete(() => {
                     if (brickContainer.Count < 4) {
-                        Debug.Log("End Game in stair");
+                        SetAnimation(AnimationType.DANCING);
+                        Debug.Log("end game in stairs");
+                        Invoke(nameof(NotiEndgame), 3f);
                         return;
                     };
-                    Debug.Log("complete to stair");
                     for(int i= 1; i<= 4; i++)
                     {
                         brickContainer[brickContainer.Count-1].parent = stairsTf;
@@ -241,6 +283,7 @@ public class Player : MonoBehaviour
             playerTf.DOMove(new Vector3(hit.point.x, playerTf.position.y, hit.point.z) - offsetTarget, time)
                         .SetEase(Ease.Linear)
                         .OnComplete(() => {
+                            Observer.Noti(conststring.UPDATECAMERA);
                             if (isEndBridge) 
                             { 
                                 isOnBridge = false;
@@ -280,6 +323,7 @@ public class Player : MonoBehaviour
         }
     private void PickBrick(GameObject brick)
     {
+        DataManager.Instance.IncScore();
         brick.tag = conststring.UNTAGGED;
         brick.transform.parent = brickContainerTf;
         brickContainer.Add(brick.transform);
@@ -291,6 +335,7 @@ public class Player : MonoBehaviour
             .SetEase(Ease.Linear)
             .OnComplete(()=>
             {
+                SetAnimation(AnimationType.STACKREACTION);
                 playerModel.localPosition = targetLocalPosition;
             });
         brickContainerTf.DOLocalMoveY(targetLocalPosition.y, oneBrick / (speed*3f))
@@ -382,11 +427,24 @@ public class Player : MonoBehaviour
                 brickTransform.parent = listBridgePointCurrent[index];
                 brickTransform.position = listBridgePointCurrent[index].position;
                 countBridgeInBody--;
-                Vector3 brickContainerLcPos = brickContainerTf.position;
-                Vector3 playerModelLcPos = playerModel.position;
-                brickContainerTf.position = new Vector3(brickContainerLcPos.x, brickContainerLcPos.y - brickHeight.y, brickContainerLcPos.z);
-                playerModel.position = new Vector3(playerModelLcPos.x, playerModelLcPos.y - brickHeight.y, playerModelLcPos.z);
-            }
+                Vector3 brickContainerLcPos = brickContainerTf.localPosition;
+                Vector3 playerModelLcPos = playerModel.localPosition;
+                //brickContainerTf.position = new Vector3(brickContainerLcPos.x, brickContainerLcPos.y - brickHeight.y, brickContainerLcPos.z);
+                //playerModel.position = new Vector3(playerModelLcPos.x, playerModelLcPos.y - brickHeight.y, playerModelLcPos.z);
+                playerModel.DOLocalMoveY(playerModelLcPos.y - brickHeight.y, oneBrick / (speed * 2f))
+                    .SetEase(Ease.Linear)
+                    .OnComplete(() =>
+                    {
+                        playerModel.localPosition = new Vector3(playerModelLcPos.x, playerModelLcPos.y - brickHeight.y, playerModelLcPos.z);
+                    });
+                brickContainerTf.DOLocalMoveY(brickContainerLcPos.y - brickHeight.y, oneBrick / (speed * 2f))
+                    .SetEase(Ease.Linear)
+                    .OnComplete(() =>
+                    {
+                        brickContainerTf.localPosition =
+                            new Vector3(brickContainerLcPos.x, brickContainerLcPos.y - brickHeight.y, brickContainerLcPos.z);
+                    });
+    }
         private void HandleNextPointIsBrick(int index, Vector3 posPoint)
     {
         indexInBridge += directOnBridge ? 1 : -1;
@@ -399,9 +457,13 @@ public class Player : MonoBehaviour
     private void MoveLastPiece()
     {
         //Time.timeScale = 0.1f;
-        Debug.Log("lastPiece");
+        Observer.Noti(conststring.CHANGECAMFOLLOWENDGAME);
+        Debug.Log("move to last piece");
         if (brickContainer.Count == 0)
         {
+            Debug.Log("end game in last piece");
+            Invoke(nameof(NotiEndgame), 3f);
+            SetAnimation(AnimationType.DANCING);
             isOutBeginBridge = true;
             isOnBridge = false;
             return;
@@ -411,45 +473,56 @@ public class Player : MonoBehaviour
         DOTween.KillAll();
         MoveNextLastPiecePoint();
     }
-    private void MoveNextLastPiecePoint()
-    {
-        Transform nextLayBrickPoint = planeEndGame.GetNextLayBrickPoint();
-        if (nextLayBrickPoint == null)
+        private void MoveNextLastPiecePoint()
         {
-            Debug.Log("den dich");
-            HandleEndBridgeLastPiece();
-            return;
+            Transform nextLayBrickPoint = planeEndGame.GetNextLayBrickPoint();
+            if (nextLayBrickPoint == null)
+            {
+                HandleEndBridgeLastPiece();
+                return;
+            }
+            Vector3 posPoint = nextLayBrickPoint.position;
+            int brickCount = brickContainer.Count;
+            Transform brickTransformOut= null;
+            if (brickCount > 0) brickTransformOut = LayBrickModel();
+            playerTf.DOMove(new Vector3(posPoint.x, playerTf.position.y, posPoint.z), oneBridge / speed)
+                .SetEase(Ease.Linear)
+                .OnComplete(() => {
+                    Observer.Noti(conststring.UPDATECAMERA);
+                    if (brickCount > 0) LayBrickLastPieceView(brickTransformOut, nextLayBrickPoint);
+                    MoveNextLastPiecePoint();
+                });
         }
-        if (brickContainer.Count == 0)
+        private void HandleEndBridgeLastPiece()
         {
-            Debug.Log("het tien");
-            isOutBeginBridge = true;
+            isMove = false;
             isOnBridge = false;
-            return;
+            DetermineTarget(playerTf.forward);
         }
-        Vector3 posPoint = nextLayBrickPoint.position;
-        Transform brickTransformOut = LayBrickModel();
-        playerTf.DOMove(new Vector3(posPoint.x, playerTf.position.y, posPoint.z), oneBridge / speed).SetEase(Ease.Linear)
-            .SetEase(Ease.Linear)
-            .OnComplete(() => {
-                LayBrickLastPieceView(brickTransformOut, nextLayBrickPoint);
-                MoveNextLastPiecePoint();
-            });
+        private void LayBrickLastPieceView(Transform brickTransform, Transform pointLayBrick)
+        {
+            brickTransform.parent = pointLayBrick;
+            brickTransform.position = pointLayBrick.position - brickHeight;
+            countBridgeInBody--;
+            Vector3 brickContainerLcPos = brickContainerTf.localPosition;
+            Vector3 playerModelLcPos = playerModel.localPosition;
+            playerModel.DOLocalMoveY(playerModelLcPos.y - brickHeight.y, oneBrick / (speed))
+                .SetEase(Ease.Linear)
+                .OnComplete(() =>
+                {
+                    playerModel.localPosition = new Vector3(playerModelLcPos.x, playerModelLcPos.y - brickHeight.y, playerModelLcPos.z);
+                });
+            brickContainerTf.DOLocalMoveY(brickContainerLcPos.y - brickHeight.y, oneBrick / (speed*1.25f))
+                .SetEase(Ease.Linear)
+                .OnComplete(() =>
+                {
+                    brickContainerTf.localPosition =
+                        new Vector3(brickContainerLcPos.x, brickContainerLcPos.y - brickHeight.y, brickContainerLcPos.z);
+                });
     }
-    private void HandleEndBridgeLastPiece()
+    private void NotiEndgame()
     {
-        isMove = true;
-        DetermineTarget(playerTf.forward);
-    }
-    private void LayBrickLastPieceView(Transform brickTransform, Transform pointLayBrick)
-    {
-        brickTransform.parent = pointLayBrick;
-        brickTransform.position = pointLayBrick.position - brickHeight;
-        countBridgeInBody--;
-        Vector3 brickContainerLcPos = brickContainerTf.position;
-        Vector3 playerModelLcPos = playerModel.position;
-        brickContainerTf.position = new Vector3(brickContainerLcPos.x, brickContainerLcPos.y - brickHeight.y, brickContainerLcPos.z);
-        playerModel.position = new Vector3(playerModelLcPos.x, playerModelLcPos.y - brickHeight.y, playerModelLcPos.z);
+        Observer.Noti(conststring.FINISHGAME);
     }
 }
 public enum AnimationType
@@ -458,18 +531,6 @@ public enum AnimationType
     MOVE,
     SURFING,
     STACKREACTION,
-}
-public static class conststring
-{
-    public static string BRICK = "Brick";
-    public static string LOPEUP = "LopeUP";
-    public static string ENDBRIDGE = "EndBridge";
-    public static string ENTRANCEBRIDGE = "EntranceBridge";
-    public static string BRIDGEBRICK = "BridgeBrick";
-    public static string UNTAGGED = "Untagged";
-    public static string GROUND = "Ground";
-    public static string IDLE = "Idle";
-    public static string MOVE = "Move";
-    public static string SURFING = "Surfing";
-    public static string STACKREACTION = "StackReaction";
+    DANCING,
+    SANTO,
 }

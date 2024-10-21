@@ -14,18 +14,12 @@ public class Player1 : MonoBehaviour
     [SerializeField] private LastPiece planeEndGame;
     [SerializeField] private Transform stairsTf;
     [SerializeField] private float speed= 10;
-    private List<Transform> listBridgePointCurrent = new List<Transform>();
     private Bridge bridgeCurrent;
-    private LastPiece_lineStraight LastPieceLSCurrent;
     private Transform playerTf;
-    private Vector3 target;
     private Vector3 beginPos;
     private Vector3 brickHeight = new Vector3(0f, 0.25f, 0f);
     private Vector3 pointCheckOffset = new Vector3(0f, 0.25f, 0f);
-    private Vector3 brickOnBridgeOffset = new Vector3(0f, 0.28f, 0f);
-    private string lastAnimName = conststring.SURFING;
     private string currentAnimName = conststring.IDLE;
-    private float half = 0.5f;
     private float oneBrick = 1f;
     private float oneBridge = 1.41f;
     private int countBridgeInBody = 0;
