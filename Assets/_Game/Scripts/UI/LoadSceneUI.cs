@@ -31,7 +31,6 @@ public class LoadSceneUI : MonoBehaviour
                 InitLoad();
             });
     }
-
     private void InitLoad()
     {
         complete = false;
@@ -66,14 +65,6 @@ public class LoadSceneUI : MonoBehaviour
                         gameObject.SetActive(false);
                     }).SetEase(Ease.Linear);
                 }).SetEase(Ease.Linear);
-                //dim.SetActive(false);
-                //canvasGroup.DOFade(0f, 0.4f).SetEase(Ease.OutQuint).OnComplete(()=> {
-                //    //dim.SetActive(false);
-                //    dim.GetComponent<Image>().DOFade(0, 0.3f).OnComplete(() =>
-                //    {
-                //        gameObject.SetActive(false);
-                //    }).SetEase(Ease.Linear);
-                //});
             });
     }
 }

@@ -59,10 +59,7 @@ public class GameManager : Singleton<GameManager>
         );
         Debug.Log(DataManager.Instance.dynamicData.CurrentEnviromentSceneName());
         while (!sceneToLoad[0].isDone) yield return null;
-        SceneManager.UnloadSceneAsync(SceneManager.GetSceneByName
-            (
-                "Level" + (idLevel-1).ToString()
-            ));
+        SceneManager.UnloadSceneAsync(SceneManager.GetSceneByName("Level" + (idLevel-1).ToString()));
         Destroy(currentMap);
         Scene targetScene = SceneManager.GetSceneByName("Level" + idLevel.ToString());
         SceneManager.SetActiveScene(targetScene);
