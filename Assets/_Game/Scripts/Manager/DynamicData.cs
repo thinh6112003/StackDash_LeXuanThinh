@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
-
+[Serializable]
 public class DynamicData
 {
     public int currentIDLevel;
@@ -31,6 +31,14 @@ public class DynamicData
     {
         vibrationStatus = status;
         Observer.Noti(conststring.UPDATESOUNDVIBRATION);
+    }
+    public bool GetVibrationStatus()
+    {
+        return vibrationStatus;
+    }
+    public bool GetSoundStatus()
+    {
+        return soundStatus;
     }
     public void SetCurrentIDLevel(int iDLevel)
     {

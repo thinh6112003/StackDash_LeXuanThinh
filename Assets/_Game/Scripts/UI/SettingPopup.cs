@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,7 +22,20 @@ public class SettingPopup : MonoBehaviour
         soundBtn.onClick.AddListener(OnClickSoundBtn);
         vibarationBtn.onClick.AddListener(OnClickVibrationBtn);
         closeBtn.onClick.AddListener(OnClickCloseBtn);
+        SetButtonsOfSetting();
     }
+
+    private void SetButtonsOfSetting()
+    {
+        // vieet di
+        vibrationStatus = DataManager.Instance.dynamicData.GetVibrationStatus();
+        soundStatus = DataManager.Instance.dynamicData.GetSoundStatus();
+        vibrationOn.SetActive(vibrationStatus);
+        vibrationOff.SetActive(!vibrationStatus);
+        soundOn.SetActive(soundStatus);
+        soundOff.SetActive(!soundStatus);
+    }
+
     private void OnClickCloseBtn()
     {
         this.gameObject.SetActive(false);

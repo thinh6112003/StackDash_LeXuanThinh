@@ -29,15 +29,15 @@ public class UIManager : Singleton<UIManager>
     private void Start()
     {
         currentSceneUI = homeSceneUI;
-        playButton.onClick.AddListener(() =>
-        {
-            OnClickPlayButton();
-        });
+        playButton.onClick.AddListener(OnClickPlayButton);
         continueButton.onClick.AddListener(OnClickContinueButton);
         backHomeButton.onClick.AddListener(OnClickBackHomeButton);
         settingButton.onClick.AddListener(OnClickSettingButton);
         Observer.AddListener(conststring.FINISHGAME, SetFinishLevel);
         Observer.AddListener(conststring.UPDATEUI, UpdateTxtUI);
+        Observer.AddListener(conststring.DONELOADNEXTLEVEL, () => {
+            SetUIScene(SceneUIType.HomeScene);
+        });
         UpdateTxtUI();
     }
 

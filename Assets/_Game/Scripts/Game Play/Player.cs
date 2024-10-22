@@ -19,7 +19,6 @@ public class Player : MonoBehaviour
     private DynamicData dynamicData;
     private Bridge bridgeCurrent;
     private Transform playerTf;
-    private Vector3 target;
     private Vector3 beginPos;
     private Vector3 brickHeight = new Vector3(0f, 0.25f, 0f);
     private Vector3 pointCheckOffset = new Vector3(0f, 0.25f, 0f);
@@ -37,7 +36,7 @@ public class Player : MonoBehaviour
     private bool directOnBridge = false;// false: negative, True: positive 
     private bool isOutBeginBridge = false;
     private const int wall = 1 << 3;
-    private const int moveNext = 1 << 6;
+    private const int moveNext = 1 << 6; 
     private const int toSlope = 1 << 7;
     private const int slope = 1 << 8;
     private const int bridgeBridge = 1 << 10;
@@ -59,6 +58,7 @@ public class Player : MonoBehaviour
         if(isPlay)OnMove();
         Observer.AddListener(conststring.DONECHANGECAM, setPlay);
         Observer.AddListener(conststring.DONELOADSCENEASYNC, setRefOfGameManager);
+        Observer.AddListener(conststring.DONELOADNEXTLEVEL, InitGame);
     }
     protected void setPlay()
     {
@@ -173,6 +173,18 @@ public class Player : MonoBehaviour
             }
         }
     }
+    public void InitGame()
+    {
+        pointCheckOffset = new Vector3(0f, 0.25f, 0f);
+        countBridgeInBody = 0;
+        for(int i= 0;i<brickContainer.Count;i++) Destroy(brickContainer[i].gameObject);
+        brickContainer.Clear();
+        SetAnimation(AnimationType.IDLE);
+        playerModel.localPosition = Vector3.zero;
+        isPlay = false;
+        isOnBridge = false;
+    }
+
     private void DetermineTarget(Vector3 direc, bool isEndBridge=false)
     {
         Vector3 playerPos = playerTf.position;

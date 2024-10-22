@@ -20,25 +20,36 @@ public class CameraController : MonoBehaviour
     [SerializeField] private CinemachineFramingTransposer cameraFollowReadyFT;
     [SerializeField] private CinemachineFramingTransposer cameraFollowEndGameFT;
     [SerializeField] private CinemachineFramingTransposer currentCameraT;
+    private float followRunCameraDistanceOrigin;
+    private float followReadyCameraDistanceOrigin;
+    private float followEndGameCameraDistanceOrigin;
+    private void Awake()
+    {
+    }
     private void Start()
     {
-        cameraFollowReadyFT = cameraFollowReady.GetCinemachineComponent<CinemachineFramingTransposer>();
-        cameraFollowRunFT = cameraFollowRun.GetCinemachineComponent<CinemachineFramingTransposer>();
-        cameraFollowEndGameFT = cameraFollowEndGame.GetCinemachineComponent<CinemachineFramingTransposer>();
-        currentCamera = cameraFollowReady;
-        currentCameraT = cameraFollowReadyFT;
+        SetRefCamera(ref cameraFollowReadyFT, cameraFollowReady, ref followReadyCameraDistanceOrigin);
+        SetRefCamera(ref cameraFollowRunFT,cameraFollowRun, ref followRunCameraDistanceOrigin);
+        SetRefCamera(ref cameraFollowEndGameFT,cameraFollowEndGame, ref followEndGameCameraDistanceOrigin);
+        SetCamera(CameraType.FollowReady);
         Observer.AddListener(conststring.CHANGECAMFOLLOWREADY, SetCameraFollowReady);
         Observer.AddListener(conststring.CHANGECAMFOLLOWRUN, SetCameraFollowRun);
         Observer.AddListener(conststring.CHANGECAMFOLLOWENDGAME,SetCameraFollowEndGame );
         Observer.AddListener(conststring.UPDATECAMERA, UpdateCamera);
         Observer.AddListener(conststring.DONELOADNEXTLEVEL, ()=> { 
             StartCoroutine(SetZeroDampingOneFrame());
+            InitGame();
         });
         
     }
     private void Update()
     {
         listenerDoneChangeCam();
+    }
+    private void SetRefCamera(ref CinemachineFramingTransposer cameraFT, CinemachineVirtualCamera cinemachineVirtualCamera , ref float mDistanceOrigin)
+    {
+        cameraFT = cinemachineVirtualCamera.GetCinemachineComponent<CinemachineFramingTransposer>();
+        mDistanceOrigin = cameraFT.m_CameraDistance;
     }
     private void listenerDoneChangeCam()
     {
@@ -53,6 +64,13 @@ public class CameraController : MonoBehaviour
         SetZeroDamping();
         yield return null;
         SetDefaultDamping();
+    }
+    private void InitGame()
+    {
+        cameraFollowEndGameFT.m_CameraDistance = followEndGameCameraDistanceOrigin;
+        cameraFollowReadyFT.m_CameraDistance = followReadyCameraDistanceOrigin;
+        cameraFollowRunFT.m_CameraDistance = followRunCameraDistanceOrigin;
+        SetCamera(CameraType.FollowReady);
     }
     private void SetZeroDamping()
     {
@@ -80,6 +98,7 @@ public class CameraController : MonoBehaviour
     }
     private void UpdateCamera()
     {
+        Debug.Log("UpdateCamera");
         playerInstance.GetBrickInBody();
         float scaleDistanceCamera = (float)playerInstance.GetBrickInBody() / paramForScale + 1f;
         currentCameraT.m_CameraDistance =  distanceOrigin* scaleDistanceCamera;
@@ -88,7 +107,7 @@ public class CameraController : MonoBehaviour
     {
         if (currentCamera != cameraSet)
         {
-            currentCamera.Priority = 0;
+            if(currentCamera != null) currentCamera.Priority = 0;
             currentCamera = cameraSet;
             currentCameraT = cameraSetT;
             currentCamera.Priority = 1;

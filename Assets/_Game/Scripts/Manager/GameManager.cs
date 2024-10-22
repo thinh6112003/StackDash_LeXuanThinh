@@ -47,11 +47,11 @@ public class GameManager : Singleton<GameManager>
     }
     private void LoadNextLevel()
     {
-        UIManager.Instance.SetUIScene(UIManager.SceneUIType.GamePlayScene);
         StartCoroutine(LoadingLevel(DataManager.Instance.dynamicData.NextCurrentIDLevel()));
     }
     private IEnumerator LoadingLevel(int idLevel)
     {
+        yield return new WaitForSeconds(0.3f);
         sceneToLoad = new List<AsyncOperation>();
         sceneToLoad.Add(SceneManager.LoadSceneAsync
         (
@@ -69,6 +69,7 @@ public class GameManager : Singleton<GameManager>
         currentMap =Instantiate(levelSO.GetMapByLevelID(idLevel));
         currentMap.getDataMap(ref player.planeEndGame, ref beginPos);
         player.SetPos(beginPos);
+        UIManager.Instance.SetUIScene(UIManager.SceneUIType.HomeScene);
         Observer.Noti(conststring.DONELOADNEXTLEVEL);
     }
     public void setPlayer(Player player)

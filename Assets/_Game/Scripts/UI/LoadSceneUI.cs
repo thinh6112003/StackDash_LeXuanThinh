@@ -9,27 +9,35 @@ public class LoadSceneUI : MonoBehaviour
 {
     [SerializeField] private Image loadingProgress;
     [SerializeField] private CanvasGroup canvasGroup;
-    [SerializeField] private GameObject dim;
+    [SerializeField] private Image dim1;
+    [SerializeField] private Image dim2;
     bool complete = false;
     private void Start()
     {
+        DontDestroyOnLoad(gameObject);
         Observer.AddListener(conststring.DONELOADSCENEASYNC, ToCompleteProgress);
-        //Observer.AddListener(conststring.DONELOADSCENEASYNC,ChangeToHome);
+        Observer.AddListener(conststring.DONELOADNEXTLEVEL, ToCompleteProgress);
+        Observer.AddListener(conststring.NEXTLEVEL,ChangeToHome);
+        InitLoad();
     }
-
     private void ChangeToHome()
     {
-        Debug.Log("alo");
-        Observer.RemoveListener(conststring.DONELOADSCENEASYNC, ChangeToHome);
-        DontDestroyOnLoad(gameObject);
+        gameObject.SetActive(true);
+        loadingProgress.fillAmount = 1;
+        dim1.DOFade(1, 0.3f).SetEase(Ease.Linear)
+            .OnComplete(() =>
+            {
+                canvasGroup.alpha = 1f;   
+                InitLoad();
+            });
     }
 
-    private void OnEnable()
+    private void InitLoad()
     {
         complete = false;
-        canvasGroup.alpha = 0;
-        canvasGroup.DOFade(1f, 0.5f).SetEase(Ease.InQuint);
-        Invoke(nameof(BeginProgress), 0.5f);
+        canvasGroup.alpha = 1f;
+        dim2.DOFade(0,0.4f).SetEase(Ease.Linear);
+        Invoke(nameof(BeginProgress), 0.4f);
     }
     private void BeginProgress()
     {
@@ -49,14 +57,23 @@ public class LoadSceneUI : MonoBehaviour
         loadingProgress.DOFillAmount(0f, 3f).SetEase(Ease.InOutQuint)
             .OnComplete(() =>
             {
-                //dim.SetActive(false);
-                canvasGroup.DOFade(0f, 0.4f).SetEase(Ease.OutQuint).OnComplete(()=> {
-                    //dim.SetActive(false);
-                    dim.GetComponent<Image>().DOFade(0, 0.3f).OnComplete(() =>
+                dim2.DOFade(1, 0.4f).SetEase(Ease.Linear).OnComplete(() =>
+                {
+                    canvasGroup.alpha = 0f;
+                    dim1.DOFade(0, 0.3f).SetEase(Ease.Linear)
+                    .OnComplete(() =>
                     {
                         gameObject.SetActive(false);
                     }).SetEase(Ease.Linear);
-                });
+                }).SetEase(Ease.Linear);
+                //dim.SetActive(false);
+                //canvasGroup.DOFade(0f, 0.4f).SetEase(Ease.OutQuint).OnComplete(()=> {
+                //    //dim.SetActive(false);
+                //    dim.GetComponent<Image>().DOFade(0, 0.3f).OnComplete(() =>
+                //    {
+                //        gameObject.SetActive(false);
+                //    }).SetEase(Ease.Linear);
+                //});
             });
     }
 }
