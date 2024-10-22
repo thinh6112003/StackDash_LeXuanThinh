@@ -13,21 +13,9 @@ public class DataManager : Singleton<DataManager>
     void Awake()
     {
         DontDestroyOnLoad(gameObject);
-        LoadData();
-        if(isdebuglevel)
-        {
-            Debug.Log("dang trong che do debug level1");
-            dynamicData = new DynamicData();
-            //dynamicData.SetCurrentIDLevel (2);
-        }
-        else
-        {
-            if (dynamicData == null) {
-                dynamicData = new DynamicData();
-                SaveData();
-            }
-        }
+        dynamicData = DataRuntimeManager.Instance.dynamicData;
     }
+    
     private void Start()
     {
         Observer.AddListener(conststring.INITGAME, InitGame);
@@ -58,26 +46,6 @@ public class DataManager : Singleton<DataManager>
     {
         score = 0;
     }
-
-    public void LoadData()
-    {
-        string dynamicDataString = PlayerPrefs.GetString(keyGetSetData);
-        dynamicData = JsonUtility.FromJson<DynamicData>(dynamicDataString);
-    }
-    public void SaveData()
-    {
-        string dynamicDataString = JsonUtility.ToJson(dynamicData);
-        PlayerPrefs.SetString(keyGetSetData, dynamicDataString);
-    }
-    private void OnApplicationFocus(bool focus)
-    {
-        SaveData();
-    }
-    private void OnApplicationQuit()
-    {
-        SaveData();
-    }
-
     public int GetEarned()
     {
         return earned;

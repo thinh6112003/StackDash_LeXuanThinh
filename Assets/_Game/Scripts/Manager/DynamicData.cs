@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DynamicData
@@ -101,5 +103,18 @@ public class DynamicData
     public bool HasEnoughGem(int amount)
     {
         return currentGem >= amount;
+    }
+
+    internal DynamicData DeepCopy()
+    {
+        return new DynamicData
+        {
+            currentIDLevel = this.currentIDLevel,
+            currentCoin = this.currentCoin,
+            currentGem = this.currentGem,
+            currentSkinName = this.currentSkinName,
+            soundStatus = this.soundStatus,
+            vibrationStatus = this.vibrationStatus
+        };
     }
 }
