@@ -16,8 +16,9 @@ public class LoadSceneUI : MonoBehaviour
     {
         DontDestroyOnLoad(gameObject);
         Observer.AddListener(conststring.DONELOADSCENEASYNC, ToCompleteProgress);
-        Observer.AddListener(conststring.DONELOADNEXTLEVEL, ToCompleteProgress);
+        Observer.AddListener(conststring.DONELOADLEVEL, ToCompleteProgress);
         Observer.AddListener(conststring.NEXTLEVEL,ChangeToHome);
+        Observer.AddListener(conststring.RELOADLEVEL,ChangeToHome);
         InitLoad();
     }
     private void ChangeToHome()
@@ -51,7 +52,6 @@ public class LoadSceneUI : MonoBehaviour
     }
     private void ToCompleteProgress()
     {
-        Debug.Log("to complete");
         complete = true;
         loadingProgress.DOFillAmount(0f, 3f).SetEase(Ease.InOutQuint)
             .OnComplete(() =>

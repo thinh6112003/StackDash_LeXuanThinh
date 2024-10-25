@@ -20,6 +20,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] private CinemachineFramingTransposer cameraFollowReadyFT;
     [SerializeField] private CinemachineFramingTransposer cameraFollowEndGameFT;
     [SerializeField] private CinemachineFramingTransposer currentCameraT;
+    [SerializeField] private CameraType currentCameraType;
     private float followRunCameraDistanceOrigin;
     private float followReadyCameraDistanceOrigin;
     private float followEndGameCameraDistanceOrigin;
@@ -36,10 +37,7 @@ public class CameraController : MonoBehaviour
         Observer.AddListener(conststring.CHANGECAMFOLLOWRUN, SetCameraFollowRun);
         Observer.AddListener(conststring.CHANGECAMFOLLOWENDGAME,SetCameraFollowEndGame );
         Observer.AddListener(conststring.UPDATECAMERA, UpdateCamera);
-        Observer.AddListener(conststring.DONELOADNEXTLEVEL, ()=> { 
-            StartCoroutine(SetZeroDampingOneFrame());
-            InitGame();
-        });
+        Observer.AddListener(conststring.DONELOADLEVEL, InitGame);
         
     }
     private void Update()
@@ -53,17 +51,11 @@ public class CameraController : MonoBehaviour
     }
     private void listenerDoneChangeCam()
     {
-        if( currentCameraBrain.IsBlending == false && isBlendingPrevios== true)
+        if( currentCameraBrain.IsBlending == false && isBlendingPrevios== true && currentCameraType== CameraType.FollowRun)
         {
             Observer.Noti(conststring.DONECHANGECAM);
         }
         isBlendingPrevios = currentCameraBrain.IsBlending;
-    }
-    public IEnumerator SetZeroDampingOneFrame()
-    {
-        SetZeroDamping();
-        yield return null;
-        SetDefaultDamping();
     }
     private void InitGame()
     {
@@ -71,18 +63,6 @@ public class CameraController : MonoBehaviour
         cameraFollowReadyFT.m_CameraDistance = followReadyCameraDistanceOrigin;
         cameraFollowRunFT.m_CameraDistance = followRunCameraDistanceOrigin;
         SetCamera(CameraType.FollowReady);
-    }
-    private void SetZeroDamping()
-    {
-        currentCameraT.m_XDamping = 0;
-        currentCameraT.m_YDamping = 0;
-        currentCameraT.m_ZDamping = 0;
-    }
-    public void SetDefaultDamping()
-    {
-        currentCameraT.m_XDamping = 1;
-        currentCameraT.m_YDamping = 1;
-        currentCameraT.m_ZDamping = 1;
     }
     public void SetCameraFollowReady()
     {
@@ -118,12 +98,15 @@ public class CameraController : MonoBehaviour
         switch (cameraType)
         {
             case CameraType.FollowRun:
+                currentCameraType = CameraType.FollowRun;
                 ChangeCamera(cameraFollowRun,cameraFollowRunFT);
                 break;
             case CameraType.FollowReady:
+                currentCameraType = CameraType.FollowReady;
                 ChangeCamera(cameraFollowReady,cameraFollowReadyFT);
                 break;
             case CameraType.FollowEndGane:
+                currentCameraType= CameraType.FollowEndGane;
                 ChangeCamera(cameraFollowEndGame, cameraFollowEndGameFT);
                 break;
         }

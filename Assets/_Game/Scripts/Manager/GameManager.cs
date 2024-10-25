@@ -22,6 +22,7 @@ public class GameManager : Singleton<GameManager>
     private void InitGame()
     {
         Observer.AddListener(conststring.NEXTLEVEL, LoadNextLevel);
+        Observer.AddListener(conststring.RELOADLEVEL, ReLoadLevel);
         sceneToLoad.Add(SceneManager.LoadSceneAsync(conststring.HOMESCENE, LoadSceneMode.Additive));
         sceneToLoad.Add(SceneManager.LoadSceneAsync
         (
@@ -39,6 +40,7 @@ public class GameManager : Singleton<GameManager>
         currentMap = Instantiate(levelSO.GetMapByLevelID(idLevel));
         currentMap.getDataMap(ref player.planeEndGame, ref beginPos);
         player.SetPos(beginPos);
+        player.setDustColor(currentMap.GetColorDust().Item1, currentMap.GetColorDust().Item2);
         Invoke(nameof(UnloadScene), 4f);
     } 
     private void UnloadScene()
@@ -47,9 +49,14 @@ public class GameManager : Singleton<GameManager>
     }
     private void LoadNextLevel()
     {
-        StartCoroutine(LoadingLevel(DataManager.Instance.dynamicData.NextCurrentIDLevel()));
+        StartCoroutine(LoadingLevel(DataManager.Instance.dynamicData.GetCurrentIDLevel()));
     }
-    private IEnumerator LoadingLevel(int idLevel)
+
+    private void ReLoadLevel()
+    {
+        StartCoroutine(LoadingLevel(DataManager.Instance.dynamicData.GetCurrentIDLevel(),true));
+    }
+    private IEnumerator LoadingLevel(int idLevel, bool reload= false)
     {
         yield return new WaitForSeconds(0.3f);
         sceneToLoad = new List<AsyncOperation>();
@@ -57,17 +64,21 @@ public class GameManager : Singleton<GameManager>
         (
             DataManager.Instance.dynamicData.CurrentEnviromentSceneName(), LoadSceneMode.Additive)
         );
-        Debug.Log(DataManager.Instance.dynamicData.CurrentEnviromentSceneName());
+
         while (!sceneToLoad[0].isDone) yield return null;
-        SceneManager.UnloadSceneAsync(SceneManager.GetSceneByName("Level" + (idLevel-1).ToString()));
+        Scene sceneUnLoad = SceneManager.GetSceneByName("Level" + (reload ? idLevel : idLevel - 1).ToString());
         Destroy(currentMap);
+        SceneManager.UnloadSceneAsync(sceneUnLoad);
+
+        yield return null;
         Scene targetScene = SceneManager.GetSceneByName("Level" + idLevel.ToString());
         SceneManager.SetActiveScene(targetScene);
         currentMap =Instantiate(levelSO.GetMapByLevelID(idLevel));
         currentMap.getDataMap(ref player.planeEndGame, ref beginPos);
         player.SetPos(beginPos);
+        player.setDustColor(currentMap.GetColorDust().Item1, currentMap.GetColorDust().Item2);
         UIManager.Instance.SetUIScene(UIManager.SceneUIType.HomeScene);
-        Observer.Noti(conststring.DONELOADNEXTLEVEL);
+        Observer.Noti(conststring.DONELOADLEVEL);
     }
     public void setPlayer(Player player)
     {

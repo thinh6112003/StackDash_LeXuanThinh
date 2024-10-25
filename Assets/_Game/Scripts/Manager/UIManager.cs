@@ -35,7 +35,7 @@ public class UIManager : Singleton<UIManager>
         settingButton.onClick.AddListener(OnClickSettingButton);
         Observer.AddListener(conststring.FINISHGAME, SetFinishLevel);
         Observer.AddListener(conststring.UPDATEUI, UpdateTxtUI);
-        Observer.AddListener(conststring.DONELOADNEXTLEVEL, () => {
+        Observer.AddListener(conststring.DONELOADLEVEL, () => {
             SetUIScene(SceneUIType.HomeScene);
         });
         UpdateTxtUI();
@@ -63,7 +63,7 @@ public class UIManager : Singleton<UIManager>
     }
     private void OnClickBackHomeButton()
     {
-
+        Observer.Noti(conststring.RELOADLEVEL);
     }
 
     private void OnClickContinueButton()

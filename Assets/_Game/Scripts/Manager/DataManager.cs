@@ -18,12 +18,18 @@ public class DataManager : Singleton<DataManager>
     
     private void Start()
     {
-        Observer.AddListener(conststring.INITGAME, InitGame);
+        Observer.AddListener(conststring.DONELOADLEVEL, InitGame);
         Observer.AddListener(conststring.LAYBRICK, UpdateScore);
+        Observer.AddListener(conststring.FINISHGAME, FinishGame);
         Observer.AddListener(conststring.NEXTLEVEL, () =>
         {
             dynamicData.AddCoin(earned);
         });
+    }
+
+    private void FinishGame()
+    {
+        dynamicData.NextCurrentIDLevel();
     }
 
     private void UpdateScore()
@@ -37,14 +43,15 @@ public class DataManager : Singleton<DataManager>
     }
     public void IncScore()
     {
+
         score++;
         Observer.Noti(conststring.UPDATEUI);
-        Debug.Log("incscore");
     }
 
     private void InitGame()
     {
         score = 0;
+        Observer.Noti(conststring.UPDATEUI);
     }
     public int GetEarned()
     {

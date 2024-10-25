@@ -31,7 +31,8 @@ public static class conststring
     public static string MAINSCENE = "Main";
     public static string LOADSCENE = "Load";
     public static string NEXTLEVEL = "NextLevel";
-    public static string DONELOADNEXTLEVEL = "DoneLoadNextLevel";
+    public static string RELOADLEVEL = "ReLoadLevel";
+    public static string DONELOADLEVEL = "DoneLoadNextLevel";
     public static string INITGAME = "InitGame";
     public static string LAYBRICK = "LayBrick";
     public static string UPDATEUI = "UpdateUI";
