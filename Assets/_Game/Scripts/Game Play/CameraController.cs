@@ -20,7 +20,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] private CinemachineFramingTransposer cameraFollowReadyFT;
     [SerializeField] private CinemachineFramingTransposer cameraFollowEndGameFT;
     [SerializeField] private CinemachineFramingTransposer currentCameraT;
-    [SerializeField] private CameraType currentCameraType;
+    [SerializeField] private Camera_Type currentCameraType;
     private float followRunCameraDistanceOrigin;
     private float followReadyCameraDistanceOrigin;
     private float followEndGameCameraDistanceOrigin;
@@ -32,7 +32,7 @@ public class CameraController : MonoBehaviour
         SetRefCamera(ref cameraFollowReadyFT, cameraFollowReady, ref followReadyCameraDistanceOrigin);
         SetRefCamera(ref cameraFollowRunFT,cameraFollowRun, ref followRunCameraDistanceOrigin);
         SetRefCamera(ref cameraFollowEndGameFT,cameraFollowEndGame, ref followEndGameCameraDistanceOrigin);
-        SetCamera(CameraType.FollowReady);
+        SetCamera(Camera_Type.FollowReady);
         Observer.AddListener(conststring.CHANGECAMFOLLOWREADY, SetCameraFollowReady);
         Observer.AddListener(conststring.CHANGECAMFOLLOWRUN, SetCameraFollowRun);
         Observer.AddListener(conststring.CHANGECAMFOLLOWENDGAME,SetCameraFollowEndGame );
@@ -51,7 +51,7 @@ public class CameraController : MonoBehaviour
     }
     private void listenerDoneChangeCam()
     {
-        if( currentCameraBrain.IsBlending == false && isBlendingPrevios== true && currentCameraType== CameraType.FollowRun)
+        if( currentCameraBrain.IsBlending == false && isBlendingPrevios== true && currentCameraType== Camera_Type.FollowRun)
         {
             Observer.Noti(conststring.DONECHANGECAM);
         }
@@ -62,23 +62,22 @@ public class CameraController : MonoBehaviour
         cameraFollowEndGameFT.m_CameraDistance = followEndGameCameraDistanceOrigin;
         cameraFollowReadyFT.m_CameraDistance = followReadyCameraDistanceOrigin;
         cameraFollowRunFT.m_CameraDistance = followRunCameraDistanceOrigin;
-        SetCamera(CameraType.FollowReady);
+        SetCamera(Camera_Type.FollowReady);
     }
     public void SetCameraFollowReady()
     {
-        SetCamera(CameraType.FollowReady);
+        SetCamera(Camera_Type.FollowReady);
     }
     public void SetCameraFollowRun()
     {
-        SetCamera(CameraType.FollowRun);
+        SetCamera(Camera_Type.FollowRun);
     }
     public void SetCameraFollowEndGame()
     {
-        SetCamera(CameraType.FollowEndGane);
+        SetCamera(Camera_Type.FollowEndGane);
     }
     private void UpdateCamera()
     {
-        Debug.Log("UpdateCamera");
         playerInstance.GetBrickInBody();
         float scaleDistanceCamera = (float)playerInstance.GetBrickInBody() / paramForScale + 1f;
         currentCameraT.m_CameraDistance =  distanceOrigin* scaleDistanceCamera;
@@ -93,27 +92,27 @@ public class CameraController : MonoBehaviour
             currentCamera.Priority = 1;
         }
     }
-    public void SetCamera(CameraType cameraType)
+    public void SetCamera(Camera_Type cameraType)
     {
         switch (cameraType)
         {
-            case CameraType.FollowRun:
-                currentCameraType = CameraType.FollowRun;
+            case Camera_Type.FollowRun:
+                currentCameraType = Camera_Type.FollowRun;
                 ChangeCamera(cameraFollowRun,cameraFollowRunFT);
                 break;
-            case CameraType.FollowReady:
-                currentCameraType = CameraType.FollowReady;
+            case Camera_Type.FollowReady:
+                currentCameraType = Camera_Type.FollowReady;
                 ChangeCamera(cameraFollowReady,cameraFollowReadyFT);
                 break;
-            case CameraType.FollowEndGane:
-                currentCameraType= CameraType.FollowEndGane;
+            case Camera_Type.FollowEndGane:
+                currentCameraType= Camera_Type.FollowEndGane;
                 ChangeCamera(cameraFollowEndGame, cameraFollowEndGameFT);
                 break;
         }
     }
 
 }
-public enum CameraType
+public enum Camera_Type
 {
     FollowRun,
     FollowReady,

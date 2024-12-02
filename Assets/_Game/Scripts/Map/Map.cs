@@ -8,6 +8,7 @@ public class Map : MonoBehaviour
     [SerializeField] private LastPiece planeEndGame;
     [SerializeField] private Color colorDust1;
     [SerializeField] private Color colorDust2;
+    [SerializeField] private Material groundMaterial;
     public void getDataMap(ref LastPiece lastPieceOfPlayer,ref Vector3 starPosOfPlayer)
     {
         lastPieceOfPlayer = planeEndGame;
@@ -16,5 +17,9 @@ public class Map : MonoBehaviour
     public (Color, Color) GetColorDust()
     {
         return (colorDust1, colorDust2);
+    }
+    public Material GetGroundMaterial()
+    {
+        return groundMaterial;
     }
 }

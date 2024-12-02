@@ -52,6 +52,10 @@ public class DynamicData
     public int NextCurrentIDLevel()
     {
         currentIDLevel++;
+        if(currentIDLevel > 5)
+        {
+            currentIDLevel = 1;
+        }
         Observer.Noti(conststring.UPDATEUI);
         return currentIDLevel;
     }

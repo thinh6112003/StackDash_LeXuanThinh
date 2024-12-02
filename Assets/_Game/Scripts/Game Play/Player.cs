@@ -86,7 +86,6 @@ public class Player : MonoBehaviour
         {
             if (!isOnBridge)
             {
-                Debug.Log("len cau");
                 bridgeCurrent = other.gameObject.GetComponent<EntranceBridge>().Parent();
                 isOnBridge = true;
                 MoveBridge(true);
@@ -241,7 +240,7 @@ public class Player : MonoBehaviour
                 .SetEase(Ease.Linear)
                 .OnComplete(() => {
                     StopDustTrail();
-                    Debug.Log("end game real");
+                    AudioManager.Instance.SetSound(AudioManager.SoundType.LevelComplete);
                     Invoke(nameof(NotiEndgame), 3f);
                     SetAnimation(AnimationType.SANTO);
                     isEndBridge = false;
@@ -307,7 +306,7 @@ public class Player : MonoBehaviour
     {
 
         float valueForShake = (brickContainer.Count > 20) ? (1f / (1f + brickContainer.Count / 20f)) * 10f : 10f;
-        DOTween.To(() => valueForShake, x => termShakeValue = x, 0, 0.2f).SetEase(Ease.Flash, 7f, 1f).OnUpdate(() =>
+        DOTween.To(() => valueForShake, x => termShakeValue = x, 0, 0.3f).SetEase(Ease.InOutFlash, 5f, 1f).OnUpdate(() =>
         {
             switch (direc.normalized)
             {
@@ -335,13 +334,14 @@ public class Player : MonoBehaviour
         playerTf.DOMove(new Vector3(hit.point.x, playerTf.position.y, hit.point.z) - offsetTarget, time)
                     .SetEase(Ease.Linear)
                     .OnComplete(() => {
-                        Debug.Log("end move to wall");
                         StopDustTrail();
                         Observer.Noti(conststring.UPDATECAMERA);
                         if (isEndBridge)
                         {
                             isOnBridge = false;
                             bridgeCurrent.TurnOnCheckInOut();
+
+                            AudioManager.Instance.SetSound(AudioManager.SoundType.BridgeClear);
                         }
                         if (!isOnBridge) isMove = false;
                         if (layer == moveNext && !isOutBeginBridge)
@@ -359,6 +359,7 @@ public class Player : MonoBehaviour
                             else
                             {
                                 SetAnimation(AnimationType.IDLE);
+                                AudioManager.Instance.SetSound(AudioManager.SoundType.Swipe);
                             }
                         }
 
@@ -388,6 +389,8 @@ public class Player : MonoBehaviour
     }
     private void PickBrick(GameObject brick)
     {
+        brick.GetComponent<Brick>().SetZoomEffectAfter(0f);
+        WaveZoomBrick();
         DataManager.Instance.IncScore();
         brick.tag = conststring.UNTAGGED;
         brick.transform.parent = brickContainerTf;
@@ -409,6 +412,14 @@ public class Player : MonoBehaviour
             {
                 brickContainerTf.localPosition = targetLocalPosition;
             });
+        AudioManager.Instance.SetSound(AudioManager.SoundType.PickBrick, (float)countBridgeInBody/100f + 0.5f );
+    }
+    private void WaveZoomBrick()
+    {
+        for (int i = countBridgeInBody - 1; i >= 0; i--)
+        {
+            brickContainer[i].gameObject.GetComponent<Brick>().SetZoomEffectAfter((countBridgeInBody - i + 1) * 0.02f);
+        }
     }
     private void MoveBridge(bool direct)
     {
@@ -425,7 +436,7 @@ public class Player : MonoBehaviour
         SetAnimation(AnimationType.SURFING);
         bridgeCurrent.TurnOffCheckInOut();
         isMove = true;
-        DOTween.KillAll();
+        //DOTween.KillAll();
         MoveNextBridgePoint();
     }
     private void MoveNextBridgePoint()
@@ -477,7 +488,7 @@ public class Player : MonoBehaviour
     private void HandleIsOutBrickInBody()
     {
         SetAnimation(AnimationType.STACKREACTION);
-        DOTween.KillAll();
+        //DOTween.KillAll();
         isMove = false;
     }
     private Transform LayBrickModel()
@@ -489,6 +500,8 @@ public class Player : MonoBehaviour
     }
     private void LayBrickView(Transform brickTransform, int index)
     {
+        Brick brick = brickTransform.gameObject.GetComponent<Brick>();
+        brick.SetMaterialAfter(GameManager.Instance.GetGroundMaterialCurrentMap(), speed * 0.005f);
         brickTransform.parent = listBridgePointCurrent[index];
         brickTransform.position = listBridgePointCurrent[index].position;
         countBridgeInBody--;
@@ -509,6 +522,8 @@ public class Player : MonoBehaviour
                 brickContainerTf.localPosition =
                     new Vector3(brickContainerLcPos.x, brickContainerLcPos.y - brickHeight.y, brickContainerLcPos.z);
             });
+        AudioManager.Instance.SetSound(AudioManager.SoundType.LayBrick, (100- countBridgeInBody)/100f + 0.5f);
+
     }
     private void HandleNextPointIsBrick(int index, Vector3 posPoint)
     {
@@ -523,10 +538,8 @@ public class Player : MonoBehaviour
     {
         //Time.timeScale = 0.1f;
         Observer.Noti(conststring.CHANGECAMFOLLOWENDGAME);
-        Debug.Log("move to last piece");
         if (brickContainer.Count == 0)
         {
-            Debug.Log("end game in last piece");
             Invoke(nameof(NotiEndgame), 3f);
             SetAnimation(AnimationType.DANCING);
             isOutBeginBridge = true;
@@ -535,7 +548,7 @@ public class Player : MonoBehaviour
         }
         SetAnimation(AnimationType.SURFING);
         isMove = true;
-        DOTween.KillAll();
+        //DOTween.KillAll();
         MoveNextLastPiecePoint();
     }
     private void MoveNextLastPiecePoint()
@@ -567,7 +580,11 @@ public class Player : MonoBehaviour
     }
     private void LayBrickLastPieceView(Transform brickTransform, Transform pointLayBrick)
     {
+        AudioManager.Instance.SetSound(AudioManager.SoundType.LayBrick, (100 - countBridgeInBody) / 100f + 0.5f);
         brickTransform.parent = pointLayBrick;
+
+        brickTransform.gameObject.GetComponent<Brick>().
+            SetMaterialAfter(GameManager.Instance.GetGroundMaterialCurrentMap(), speed * 0.005f);
         brickTransform.position = pointLayBrick.position - brickHeight;
         countBridgeInBody--;
         Vector3 brickContainerLcPos = brickContainerTf.localPosition;

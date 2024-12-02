@@ -19,7 +19,7 @@ public class GameManager : Singleton<GameManager>
     {
         InitGame();
     }
-    private void InitGame()
+    private async void InitGame()
     {
         Observer.AddListener(conststring.NEXTLEVEL, LoadNextLevel);
         Observer.AddListener(conststring.RELOADLEVEL, ReLoadLevel);
@@ -66,7 +66,7 @@ public class GameManager : Singleton<GameManager>
         );
 
         while (!sceneToLoad[0].isDone) yield return null;
-        Scene sceneUnLoad = SceneManager.GetSceneByName("Level" + (reload ? idLevel : idLevel - 1).ToString());
+        Scene sceneUnLoad = SceneManager.GetSceneByName("Level" + (reload ? idLevel : idLevel == 1 ? 5: idLevel - 1).ToString());
         Destroy(currentMap);
         SceneManager.UnloadSceneAsync(sceneUnLoad);
 
@@ -83,5 +83,9 @@ public class GameManager : Singleton<GameManager>
     public void setPlayer(Player player)
     {
         this.player = player;
+    }
+    public Material GetGroundMaterialCurrentMap()
+    {
+        return currentMap.GetGroundMaterial();
     }
 }

@@ -183,7 +183,8 @@ public class Player1 : MonoBehaviour
         brickContainer.Clear();
         SetAnimation(AnimationType.IDLE);
         playerModel.localPosition = Vector3.zero;
-        isPlay = false;
+        /* Off to test
+        isPlay = false;*/
         isOnBridge = false;
     }
 

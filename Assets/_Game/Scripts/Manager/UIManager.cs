@@ -43,12 +43,12 @@ public class UIManager : Singleton<UIManager>
 
     private void OnClickSettingButton()
     {
+        AudioManager.Instance.SetSound(AudioManager.SoundType.ButtonClick);
         settingPopup.SetActive(true);
     }
     private void UpdateTxtUI()
     {
         DynamicData dynamicdata =  DataManager.Instance.dynamicData;
-
         level_Home_Txt.text = "Level " + dynamicdata.currentIDLevel;
         coin_Home_Txt.text = dynamicdata.GetCurrentCoin().ToString();
         gem_Home_Txt.text = dynamicdata.GetCurrentGem().ToString();
@@ -63,16 +63,19 @@ public class UIManager : Singleton<UIManager>
     }
     private void OnClickBackHomeButton()
     {
+        AudioManager.Instance.SetSound(AudioManager.SoundType.ButtonClick);
         Observer.Noti(conststring.RELOADLEVEL);
     }
 
     private void OnClickContinueButton()
     {
+        AudioManager.Instance.SetSound(AudioManager.SoundType.ButtonClick);
         Observer.Noti(conststring.NEXTLEVEL);
     }
 
     private void OnClickPlayButton()
     {
+        AudioManager.Instance.SetSound(AudioManager.SoundType.ButtonClick);
         Observer.Noti(conststring.CHANGECAMFOLLOWRUN);
         SetUIScene(SceneUIType.GamePlayScene);
     }

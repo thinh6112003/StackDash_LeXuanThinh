@@ -27,7 +27,7 @@ public class SettingPopup : MonoBehaviour
 
     private void SetButtonsOfSetting()
     {
-        // vieet di
+
         vibrationStatus = DataManager.Instance.dynamicData.GetVibrationStatus();
         soundStatus = DataManager.Instance.dynamicData.GetSoundStatus();
         vibrationOn.SetActive(vibrationStatus);
@@ -39,6 +39,7 @@ public class SettingPopup : MonoBehaviour
     private void OnClickCloseBtn()
     {
         this.gameObject.SetActive(false);
+        AudioManager.Instance.SetSound(AudioManager.SoundType.ButtonClick);
     }
 
     private void OnClickVibrationBtn()
@@ -47,6 +48,7 @@ public class SettingPopup : MonoBehaviour
         vibrationOn.SetActive(vibrationStatus);
         vibrationOff.SetActive(!vibrationStatus);
         DataManager.Instance.dynamicData.SetVibrationStatus(vibrationStatus);
+        AudioManager.Instance.SetSound(AudioManager.SoundType.ButtonClick);
     }
 
     private void OnClickSoundBtn()
@@ -55,5 +57,6 @@ public class SettingPopup : MonoBehaviour
         soundOn.SetActive(soundStatus);
         soundOff.SetActive(!soundStatus);
         DataManager.Instance.dynamicData.SetActiveSoundStatus(soundStatus);
+        AudioManager.Instance.SetSound(AudioManager.SoundType.ButtonClick);
     }
 }
