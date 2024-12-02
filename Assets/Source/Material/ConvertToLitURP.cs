@@ -3,11 +3,11 @@ using UnityEngine;
 using System.IO;
 
 public class ConvertToLitURP : EditorWindow
-{
+{ 
     // Khai báo thư mục gốc chứa các file material
     private string folderPath = "Assets/Materials";  // Bạn có thể thay đổi đường dẫn này
 
-    [MenuItem("Tools/Convert All Materials to URP Lit Shader")]
+    [MenuItem("Tools/Convert All URP Materials to URP Lit Shader")]
     public static void ShowWindow()
     {
         // Mở cửa sổ công cụ editor
@@ -16,18 +16,18 @@ public class ConvertToLitURP : EditorWindow
 
     private void OnGUI()
     {
-        GUILayout.Label("Convert All Materials to URP Lit Shader", EditorStyles.boldLabel);
+        GUILayout.Label("Convert All URP Materials to URP Lit Shader", EditorStyles.boldLabel);
 
         // Chọn thư mục chứa material
         folderPath = EditorGUILayout.TextField("Folder Path", folderPath);
 
-        if (GUILayout.Button("Convert Materials"))
+        if (GUILayout.Button("Convert URP Materials"))
         {
-            ConvertMaterialsToURP(folderPath);
+            ConvertURPToURPLit(folderPath);
         }
     }
 
-    private void ConvertMaterialsToURP(string path)
+    private void ConvertURPToURPLit(string path)
     {
         // Lấy tất cả các asset trong thư mục với đuôi .mat
         string[] materialGUIDs = AssetDatabase.FindAssets("t:Material", new[] { path });
@@ -39,13 +39,17 @@ public class ConvertToLitURP : EditorWindow
 
             if (material != null)
             {
-                // Kiểm tra và thay đổi shader của material thành URP Lit Shader
-                if (material.shader != Shader.Find("Universal Render Pipeline/Lit"))
+                // Kiểm tra xem shader hiện tại của material có phải là URP không
+                if (material.shader.name.Contains("Standard"))
                 {
-                    Undo.RecordObject(material, "Convert Shader to URP Lit");
-                    material.shader = Shader.Find("Universal Render Pipeline/Lit");
-                    EditorUtility.SetDirty(material);
-                    Debug.Log($"Converted shader for material: {material.name}");
+                    // Chỉ thay đổi shader nếu nó là shader của URP
+                    if (material.shader != Shader.Find("Universal Render Pipeline/Lit"))
+                    {
+                        Undo.RecordObject(material, "Convert Shader to URP Lit");
+                        material.shader = Shader.Find("Universal Render Pipeline/Lit");
+                        EditorUtility.SetDirty(material);
+                        Debug.Log($"Converted shader for material: {material.name}");
+                    }
                 }
             }
         }
